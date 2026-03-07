@@ -1,0 +1,39 @@
+# Development Dockerfile - with additional tools for development
+FROM python:3.10-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PIP_NO_CACHE_DIR=1
+
+# Install system dependencies including development tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    git \
+    curl \
+    postgresql-client \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY config/requirements.txt .
+
+# Install all dependencies including development tools
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install -r requirements.txt && \
+    pip install \
+    pytest pytest-flask pytest-cov \
+    black isort flake8 pylint \
+    bandit safety \
+    ipython \
+    jupyter
+
+COPY . .
+
+# Create non-root user
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 5000 8888
+
+CMD ["python", "run.py"]

@@ -1,0 +1,30 @@
+# Proprietários do código
+
+# Autenticação
+/app/auth/ @owner
+
+# Modelos
+/app/models/ @owner
+
+# Rotas
+/app/routes/ @owner
+
+# Utilitários
+/app/utils/ @owner
+
+# Testes
+/tests/ @owner
+
+# Documentação
+/docs/ @owner
+
+# Configuração
+/config/ @owner
+
+# GitHub CI/CD
+/.github/ @owner
+
+# Arquivo de configuração raiz
+/*.yml @owner
+/*.md @owner
+/.env.example @owner

@@ -1,0 +1,43 @@
+# .pylintrc - Configuração do Pylint
+
+[MASTER]
+# Use multiple processes to speed up Pylint
+jobs=4
+
+# List of plugins
+load-plugins=
+
+[MESSAGES CONTROL]
+# Disable specific messages
+disable=
+    missing-docstring,
+    too-few-public-methods,
+    too-many-arguments,
+    invalid-name,
+    no-name-in-module,
+    fixme
+
+[REPORTS]
+# Set output format
+output-format=colorized
+
+# Report only message on stdout
+reports=yes
+
+# Evaluation function
+evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
+
+[DESIGN]
+max-args=5
+max-attributes=7
+max-bool-expr=5
+max-branches=12
+max-locals=15
+max-parents=7
+max-public-methods=20
+max-returns=6
+max-statements=50
+min-public-methods=2
+
+[BASIC]
+good-names=i,j,k,ex,Run,_
