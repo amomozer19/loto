@@ -1,0 +1,22 @@
+# Core
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# Security & Authentication
+itsdangerous==2.1.2
+Flask-WTF==1.1.1
+WTForms==3.0.1
+python-keycloak==3.8.0
+python-keycloak-client==1.0.5
+requests==2.31.0
+PyJWT==2.8.1
+cryptography==41.0.3
+
+# OAuth2 & OpenID Connect
+authlib==1.2.1
+Flask-OAuthlib==0.9.7
+
+# Testing
+pytest==7.4.0
+pytest-flask==1.2.0
+pytest-cov==4.1.0

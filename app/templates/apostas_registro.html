@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Apostas - Loto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            padding-top: 80px;
+        }
+
+        .sidebar.show {
+            right: 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            margin: 0;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 15px 25px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-link:hover {
+            background-color: #f5f7ff;
+            color: var(--secondary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-link.active {
+            background-color: #e8f0ff;
+            border-left-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 10px 0;
+        }
+
+        .sidebar-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            z-index: 999;
+            transition: background 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sidebar-overlay.show {
+            background: rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+        }
+
+        .bg-gradient {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .main-content {
+            margin-right: 0;
+            transition: margin-right 0.3s ease;
+            padding-top: 30px;
+        }
+
+        .aposta-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .aposta-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .number-grid {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .btn-check:checked + label {
+            font-weight: bold;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+        }
+
+        .resultado-checkbox:checked + label {
+            background-color: #198754;
+            border-color: #198754;
+            color: white;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-label {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.1);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Toggle Button -->
+    <button class="menu-toggle" id="menuToggle" title="Abrir menu">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+        <button class="sidebar-close" id="sidebarClose">
+            <i class="bi bi-x-circle"></i>
+        </button>
+        <ul class="sidebar-menu">
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/">
+                    <i class="bi bi-house-fill"></i> Início
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/novo">
+                    <i class="bi bi-plus-circle"></i> Novo Sorteio
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/aposta">
+                    <i class="bi bi-graph-up"></i> Apostas Recomendadas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link active" href="/apostas">
+                    <i class="bi bi-clipboard-check"></i> Registrar Apostas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/estatisticas">
+                    <i class="bi bi-bar-chart"></i> Estatísticas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/sorte">
+                    <i class="bi bi-stars"></i> Sorte!
+                </a>
+            </li>
+            <div class="sidebar-divider"></div>
+            <li class="sidebar-item">
+                <a class="sidebar-link text-danger" href="/auth/encerrar" title="Encerrar sessão e servidor">
+                    <i class="bi bi-power"></i> Encerrar
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content container-lg">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-gradient py-4">
+                        <h2 class="mb-0">
+                            <i class="bi bi-clipboard-check"></i> Registrar Apostas Realizadas
+                        </h2>
+                        <small class="text-light">Insira as apostas que você realizou para análise de resultado</small>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" id="formApostas">
+                            <!-- Informações Básicas -->
+                            <div class="alert alert-info" role="alert">
+                                <strong>Como funciona?</strong> Registre suas apostas com a data, números apostados e o resultado. 
+                                O sistema analisará se você ganhou e fornecerá recomendações para futuras apostas.
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="dataAposta" class="form-label">
+                                        <i class="bi bi-calendar-event"></i> Data da Aposta
+                                    </label>
+                                    <input type="date" class="form-control" id="dataAposta" name="data_aposta" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="concurso" class="form-label">
+                                        <i class="bi bi-hash"></i> Número do Concurso
+                                    </label>
+                                    <input type="text" class="form-control" id="concurso" name="concurso" 
+                                           placeholder="Ex: 2563" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="quantidadeApostas" class="form-label">
+                                    <i class="bi bi-collection"></i> Quantidade de Apostas
+                                </label>
+                                <input type="number" class="form-control" id="quantidadeApostas" 
+                                       name="quantidade_apostas" min="1" max="20" value="1" required>
+                                <small class="text-muted">Quantas apostas diferentes você realizou?</small>
+                            </div>
+
+                            <!-- Container para apostas dinâmicas -->
+                            <div id="containerApostas" class="mb-4">
+                                <div class="aposta-card card mb-3 border-start border-primary border-3">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">Aposta #<span class="aposta-numero">1</span></h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">
+                                                <i class="bi bi-pencil-square"></i> Nome ou Descrição da Aposta
+                                            </label>
+                                            <input type="text" class="form-control nome-aposta" 
+                                                   placeholder="Ex: Números Pares, Sorte do Dia, etc." required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">
+                                                <i class="bi bi-list-check"></i> Números Apostados (7 a 15 números)
+                                            </label>
+                                            <div class="number-grid">
+                                                <div class="row g-2">
+                                                    {% for num in range(1, 26) %}
+                                                    <div class="col-auto">
+                                                        <input type="checkbox" class="btn-check numero-checkbox" 
+                                                               id="num_0_{{ num }}" 
+                                                               value="{{ num }}" name="numeros_0">
+                                                        <label class="btn btn-outline-primary btn-sm" 
+                                                               for="num_0_{{ num }}" 
+                                                               style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                            {{ num }}
+                                                        </label>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <small class="text-muted d-block mt-2">
+                                                Números selecionados: <span class="contador-numeros">0</span>/15
+                                            </small>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">
+                                                <i class="bi bi-chat-left-quote"></i> Raciocínio (opcional)
+                                            </label>
+                                            <textarea class="form-control raciocinio-aposta" rows="2" 
+                                                      placeholder="Explique por que escolheu esses números..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Resultado do Sorteio -->
+                            <div class="card mb-4 border-success border-3">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-trophy"></i> Resultado do Sorteio
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="resultadoSorteio" class="form-label">
+                                            Números que saíram (15 números)
+                                        </label>
+                                        <div class="number-grid">
+                                            <div class="row g-2">
+                                                {% for num in range(1, 26) %}
+                                                <div class="col-auto">
+                                                    <input type="checkbox" class="btn-check resultado-checkbox" 
+                                                           id="result_{{ num }}" value="{{ num }}" name="resultado_sorteio">
+                                                    <label class="btn btn-outline-success btn-sm" 
+                                                           for="result_{{ num }}" 
+                                                           style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                        {{ num }}
+                                                    </label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">
+                                            Números selecionados: <span class="contador-resultado">0</span>/15
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botões de Ação -->
+                            <div class="d-flex gap-2 justify-content-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-check-circle"></i> Registrar e Analisar
+                                </button>
+                                <button type="reset" class="btn btn-secondary btn-lg">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Limpar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 Aplicação Loto. Todos os direitos reservados.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sidebar Toggle Functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const currentPage = window.location.pathname;
+
+        // Set active link based on current page
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // Toggle sidebar on menu button click
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+            sidebarOverlay.classList.toggle('show');
+        });
+
+        // Close sidebar on close button click
+        sidebarClose.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar on overlay click
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar when a link is clicked
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        });
+
+        // Form functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Atualizar quantidade de apostas
+            document.getElementById('quantidadeApostas').addEventListener('change', function() {
+                const quantidade = parseInt(this.value);
+                const container = document.getElementById('containerApostas');
+                
+                // Remover apostas extras
+                while (container.children.length > quantidade) {
+                    container.removeChild(container.lastChild);
+                }
+                
+                // Adicionar novas apostas
+                while (container.children.length < quantidade) {
+                    const index = container.children.length;
+                    const novaAposta = criarCardAposta(index);
+                    container.appendChild(novaAposta);
+                }
+            });
+
+            // Contador de números selecionados
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('numero-checkbox')) {
+                    const card = e.target.closest('.aposta-card');
+                    const contador = card.querySelector('.contador-numeros');
+                    const selecionados = card.querySelectorAll('.numero-checkbox:checked').length;
+                    contador.textContent = selecionados;
+                }
+                
+                if (e.target.classList.contains('resultado-checkbox')) {
+                    const contador = document.querySelector('.contador-resultado');
+                    const selecionados = document.querySelectorAll('.resultado-checkbox:checked').length;
+                    contador.textContent = selecionados;
+                }
+            });
+
+            // Validação e envio do formulário
+            document.getElementById('formApostas').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Validar resultado
+                const resultadoCount = document.querySelectorAll('.resultado-checkbox:checked').length;
+                if (resultadoCount !== 15) {
+                    alert('⚠️ Você deve selecionar exatamente 15 números do resultado!');
+                    return;
+                }
+
+                // Validar apostas
+                const apostas = document.querySelectorAll('.aposta-card');
+                for (let aposta of apostas) {
+                    const numerosCount = aposta.querySelectorAll('.numero-checkbox:checked').length;
+                    if (numerosCount < 7 || numerosCount > 15) {
+                        alert('⚠️ Cada aposta deve ter entre 7 e 15 números!');
+                        return;
+                    }
+                }
+
+                // Montar dados para envio
+                const formData = new FormData();
+                formData.append('data_aposta', document.getElementById('dataAposta').value);
+                formData.append('concurso', document.getElementById('concurso').value);
+                formData.append('quantidade_apostas', document.getElementById('quantidadeApostas').value);
+
+                // Adicionar números do resultado
+                const resultados = document.querySelectorAll('.resultado-checkbox:checked');
+                resultados.forEach(r => {
+                    formData.append('resultado_sorteio[]', r.value);
+                });
+
+                // Adicionar apostas
+                apostas.forEach((aposta, index) => {
+                    const nomeInput = aposta.querySelector('.nome-aposta');
+                    const numerosCheckboxes = aposta.querySelectorAll('.numero-checkbox:checked');
+                    const raciocinio = aposta.querySelector('.raciocinio-aposta');
+
+                    formData.append(`apostas_nome_aposta_${index}`, nomeInput.value);
+                    numerosCheckboxes.forEach(checkbox => {
+                        formData.append(`numeros_${index}[]`, checkbox.value);
+                    });
+                    formData.append(`raciocinio_aposta_${index}`, raciocinio.value);
+                });
+
+                // Enviar via AJAX
+                try {
+                    const response = await fetch('/apostas/analisar', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const resultado = await response.json();
+
+                    if (resultado.sucesso) {
+                        // Redirecionar para página de análise
+                        window.location.href = resultado.redirect;
+                    } else {
+                        alert('❌ Erro ao analisar: ' + resultado.erro);
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('❌ Erro ao enviar dados. Verifique a conexão.');
+                }
+            });
+
+            // Data padrão = hoje
+            document.getElementById('dataAposta').valueAsDate = new Date();
+        });
+
+        function criarCardAposta(index) {
+            const card = document.createElement('div');
+            card.className = 'aposta-card card mb-3 border-start border-primary border-3';
+            card.innerHTML = `
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Aposta #${index + 1}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-pencil-square"></i> Nome ou Descrição da Aposta
+                        </label>
+                        <input type="text" class="form-control nome-aposta" 
+                               placeholder="Ex: Números Pares, Sorte do Dia, etc." required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-list-check"></i> Números Apostados
+                        </label>
+                        <div class="number-grid">
+                            <div class="row g-2">
+                                ${gerarNumeros(index)}
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            Números selecionados: <span class="contador-numeros">0</span>/15
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-chat-left-quote"></i> Raciocínio (opcional)
+                        </label>
+                        <textarea class="form-control raciocinio-aposta" rows="2" 
+                                  placeholder="Explique por que escolheu esses números..."></textarea>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function gerarNumeros(apostaIndex) {
+            let html = '';
+            for (let num = 1; num <= 25; num++) {
+                html += `
+                    <div class="col-auto">
+                        <input type="checkbox" class="btn-check numero-checkbox" 
+                               id="num_${apostaIndex}_${num}" value="${num}" name="numeros_${apostaIndex}">
+                        <label class="btn btn-outline-primary btn-sm" 
+                               for="num_${apostaIndex}_${num}" 
+                               style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            ${num}
+                        </label>
+                    </div>
+                `;
+            }
+            return html;
+        }
+    </script>
+</body>
+</html>
+
+                            <!-- Botões de Ação -->
+                            <div class="d-flex gap-2 justify-content-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-check-circle"></i> Registrar e Analisar
+                                </button>
+                                <button type="reset" class="btn btn-secondary btn-lg">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Limpar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .aposta-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .aposta-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .number-grid {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .btn-check:checked + label {
+        font-weight: bold;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    }
+
+    .resultado-checkbox:checked + label {
+        background-color: #198754;
+        border-color: #198754;
+        color: white;
+    }
+
+    .main-content {
+        margin-right: 280px;
+        transition: margin-right 0.3s ease;
+    }
+
+    @media (max-width: 1024px) {
+        .main-content {
+            margin-right: 0;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Atualizar quantidade de apostas
+        document.getElementById('quantidadeApostas').addEventListener('change', function() {
+            const quantidade = parseInt(this.value);
+            const container = document.getElementById('containerApostas');
+            
+            // Remover apostas extras
+            while (container.children.length > quantidade) {
+                container.removeChild(container.lastChild);
+            }
+            
+            // Adicionar novas apostas
+            while (container.children.length < quantidade) {
+                const index = container.children.length;
+                const novaAposta = criarCardAposta(index);
+                container.appendChild(novaAposta);
+            }
+        });
+
+        // Contador de números selecionados
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('numero-checkbox')) {
+                const card = e.target.closest('.aposta-card');
+                const contador = card.querySelector('.contador-numeros');
+                const selecionados = card.querySelectorAll('.numero-checkbox:checked').length;
+                contador.textContent = selecionados;
+            }
+            
+            if (e.target.classList.contains('resultado-checkbox')) {
+                const contador = document.querySelector('.contador-resultado');
+                const selecionados = document.querySelectorAll('.resultado-checkbox:checked').length;
+                contador.textContent = selecionados;
+            }
+        });
+
+        // Validação e envio do formulário
+        document.getElementById('formApostas').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validar resultado
+            const resultadoCount = document.querySelectorAll('.resultado-checkbox:checked').length;
+            if (resultadoCount !== 15) {
+                alert('⚠️ Você deve selecionar exatamente 15 números do resultado!');
+                return;
+            }
+
+            // Validar apostas
+            const apostas = document.querySelectorAll('.aposta-card');
+            for (let aposta of apostas) {
+                const numerosCount = aposta.querySelectorAll('.numero-checkbox:checked').length;
+                if (numerosCount < 7 || numerosCount > 15) {
+                    alert('⚠️ Cada aposta deve ter entre 7 e 15 números!');
+                    return;
+                }
+            }
+
+            // Montar dados para envio
+            const formData = new FormData();
+            formData.append('data_aposta', document.getElementById('dataAposta').value);
+            formData.append('concurso', document.getElementById('concurso').value);
+            formData.append('quantidade_apostas', document.getElementById('quantidadeApostas').value);
+
+            // Adicionar números do resultado
+            const resultados = document.querySelectorAll('.resultado-checkbox:checked');
+            resultados.forEach(r => {
+                formData.append('resultado_sorteio[]', r.value);
+            });
+
+            // Adicionar apostas
+            apostas.forEach((aposta, index) => {
+                const nomeInput = aposta.querySelector('.nome-aposta');
+                const numerosCheckboxes = aposta.querySelectorAll('.numero-checkbox:checked');
+                const raciocinio = aposta.querySelector('.raciocinio-aposta');
+
+                formData.append(`apostas_nome_aposta_${index}`, nomeInput.value);
+                numerosCheckboxes.forEach(checkbox => {
+                    formData.append(`numeros_${index}[]`, checkbox.value);
+                });
+                formData.append(`raciocinio_aposta_${index}`, raciocinio.value);
+            });
+
+            // Enviar via AJAX
+            try {
+                const response = await fetch('/apostas/analisar', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.sucesso) {
+                    // Redirecionar para página de análise
+                    window.location.href = resultado.redirect;
+                } else {
+                    alert('❌ Erro ao analisar: ' + resultado.erro);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('❌ Erro ao enviar dados. Verifique a conexão.');
+            }
+        });
+
+        // Data padrão = hoje
+        document.getElementById('dataAposta').valueAsDate = new Date();
+    });
+
+    function criarCardAposta(index) {
+        const card = document.createElement('div');
+        card.className = 'aposta-card card mb-3 border-start border-primary border-3';
+        card.innerHTML = `
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Aposta #${index + 1}</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="bi bi-pencil-square"></i> Nome ou Descrição da Aposta
+                    </label>
+                    <input type="text" class="form-control nome-aposta" 
+                           placeholder="Ex: Números Pares, Sorte do Dia, etc." required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="bi bi-list-check"></i> Números Apostados
+                    </label>
+                    <div class="number-grid">
+                        <div class="row g-2">
+                            ${gerarNumeros(index)}
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2">
+                        Números selecionados: <span class="contador-numeros">0</span>/15
+                    </small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        <i class="bi bi-chat-left-quote"></i> Raciocínio (opcional)
+                    </label>
+                    <textarea class="form-control raciocinio-aposta" rows="2" 
+                              placeholder="Explique por que escolheu esses números..."></textarea>
+                </div>
+            </div>
+        `;
+        return card;
+    }
+
+    function gerarNumeros(apostaIndex) {
+        let html = '';
+        for (let num = 1; num <= 25; num++) {
+            html += `
+                <div class="col-auto">
+                    <input type="checkbox" class="btn-check numero-checkbox" 
+                           id="num_${apostaIndex}_${num}" value="${num}" name="numeros_${apostaIndex}">
+                    <label class="btn btn-outline-primary btn-sm" 
+                           for="num_${apostaIndex}_${num}" 
+                           style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        ${num}
+                    </label>
+                </div>
+            `;
+        }
+        return html;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Apostas - Loto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            padding-top: 80px;
+        }
+
+        .sidebar.show {
+            right: 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            margin: 0;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 15px 25px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-link:hover {
+            background-color: #f5f7ff;
+            color: var(--secondary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-link.active {
+            background-color: #e8f0ff;
+            border-left-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 10px 0;
+        }
+
+        .sidebar-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            z-index: 999;
+            transition: background 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sidebar-overlay.show {
+            background: rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+        }
+
+        .main-content {
+            padding-top: 30px;
+            padding-bottom: 30px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .badge {
+            font-size: 12px;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.1);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Toggle Button -->
+    <button class="menu-toggle" id="menuToggle" title="Abrir menu">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+        <button class="sidebar-close" id="sidebarClose">
+            <i class="bi bi-x-circle"></i>
+        </button>
+        <ul class="sidebar-menu">
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/">
+                    <i class="bi bi-house-fill"></i> Início
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/novo">
+                    <i class="bi bi-plus-circle"></i> Novo Sorteio
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/aposta">
+                    <i class="bi bi-graph-up"></i> Apostas Recomendadas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link active" href="/apostas">
+                    <i class="bi bi-clipboard-check"></i> Registrar Apostas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/estatisticas">
+                    <i class="bi bi-bar-chart"></i> Estatísticas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/sorte">
+                    <i class="bi bi-stars"></i> Sorte!
+                </a>
+            </li>
+            <div class="sidebar-divider"></div>
+            <li class="sidebar-item">
+                <a class="sidebar-link text-danger" href="/auth/encerrar" title="Encerrar sessão e servidor">
+                    <i class="bi bi-power"></i> Encerrar
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content container-lg">
+        {% if resultado %}
+            <!-- Resultado da Análise -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        <h5>📊 Análise da Aposta - {{ resultado.data }}</h5>
+                        <p><strong>Concurso:</strong> {{ resultado.concurso }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Geral -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header {% if resultado.ganhou %}bg-success{% else %}bg-danger{% endif %} text-white">
+                            <h4 class="mb-0">
+                                {% if resultado.ganhou %}
+                                    <i class="bi bi-trophy-fill"></i> ✨ PARABÉNS! VOCÊ GANHOU! ✨
+                                {% else %}
+                                    <i class="bi bi-x-circle-fill"></i> Resultado Negativo
+                                {% endif %}
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <h6 class="text-muted">Maior Acerto</h6>
+                                    <h3 class="text-primary">{{ resultado.maior_acerto }}</h3>
+                                    <small>números/padrões</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-muted">Aposta Melhor Classificada</h6>
+                                    <h3>{{ resultado.melhor_aposta }}</h3>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-muted">Score Médio</h6>
+                                    <h3>{{ resultado.score_medio }}</h3>
+                                    <small>/100</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Números do Sorteio -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card border-success border-3">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-trophy"></i> Números do Sorteio
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for num in resultado.numeros_sorteio %}
+                                    <span class="badge bg-success" style="font-size: 16px; padding: 8px 12px;">
+                                        {{ num }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Análise por Aposta -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h4 class="mb-3">📋 Análise Detalhada por Aposta</h4>
+                </div>
+                {% for aposta in resultado.analise_apostas %}
+                <div class="col-md-12 mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ aposta.nome }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <strong>Números Apostados:</strong>
+                                    <div class="d-flex flex-wrap gap-1 mt-2">
+                                        {% for num in aposta.numeros %}
+                                            <span class="badge bg-primary">{{ num }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Acertos:</strong>
+                                    <div class="d-flex flex-wrap gap-1 mt-2">
+                                        {% for num in aposta.acertos %}
+                                            <span class="badge bg-success">{{ num }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Não Acertados:</strong>
+                                    <div class="d-flex flex-wrap gap-1 mt-2">
+                                        {% for num in aposta.nao_acertos %}
+                                            <span class="badge bg-danger">{{ num }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Estatísticas:</strong>
+                                    <p class="mb-0">
+                                        <br/>
+                                        <strong class="text-success">{{ aposta.qtd_acertos }}/{{ aposta.qtd_apostados }}</strong> acertos
+                                        <br/>
+                                        <small class="text-muted">Score: {{ aposta.score }}/100</small>
+                                    </p>
+                                </div>
+                            </div>
+
+                            {% if aposta.raciocinio %}
+                            <div class="alert alert-light">
+                                <strong>Raciocínio:</strong> {{ aposta.raciocinio }}
+                            </div>
+                            {% endif %}
+
+                            {% if aposta.tuplas_acertadas %}
+                            <div class="mb-2">
+                                <strong>Duplas Acertadas:</strong>
+                                <span class="badge bg-info">{{ aposta.tuplas_acertadas }} padrões</span>
+                            </div>
+                            {% endif %}
+
+                            {% if aposta.tripletas_acertadas %}
+                            <div>
+                                <strong>Triplas Acertadas:</strong>
+                                <span class="badge bg-warning">{{ aposta.tripletas_acertadas }} padrões</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Análise Inteligente (se perdeu) -->
+            {% if not resultado.ganhou and resultado.analise_agente %}
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card border-warning border-3">
+                        <div class="card-header bg-warning bg-opacity-10">
+                            <h5 class="mb-0">
+                                <i class="bi bi-robot"></i> Análise Inteligente - Por que você não ganhou?
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-danger">⚠️ Padrões Não Identificados</h6>
+                                    <ul class="list-unstyled">
+                                        {% for padrao in resultado.analise_agente.padroes_nao_identificados %}
+                                            <li class="mb-2">
+                                                <strong>{{ padrao.tipo }}:</strong> {{ padrao.descricao }}
+                                                <br/>
+                                                <small class="text-muted">Frequência: {{ padrao.frequencia }}%</small>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-info">💡 Recomendações</h6>
+                                    <ul class="list-unstyled">
+                                        {% for rec in resultado.analise_agente.recomendacoes %}
+                                            <li class="mb-2">
+                                                <i class="bi bi-check-circle"></i> {{ rec }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <hr/>
+
+                            <h6 class="text-success mt-3">📈 Números com Melhor Potencial (para próximas apostas)</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for num in resultado.analise_agente.numeros_recomendados %}
+                                    <span class="badge bg-success" style="font-size: 14px; padding: 6px 10px;">
+                                        {{ num.numero }} ({{ num.frequencia }}% freq.)
+                                    </span>
+                                {% endfor %}
+                            </div>
+
+                            <p class="text-muted small mt-3 mb-0">
+                                <i class="bi bi-info-circle"></i>
+                                Análise baseada em {{ resultado.analise_agente.registros_analisados }} registros históricos
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Botões de Ação -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="/apostas" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Registrar Novas Apostas
+                        </a>
+                        <a href="/sorte" class="btn btn-success">
+                            <i class="bi bi-stars"></i> Ver Recomendações da Sorte
+                        </a>
+                        <a href="/aposta" class="btn btn-info">
+                            <i class="bi bi-graph-up"></i> Ver Estatísticas
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- Nenhuma aposta ainda -->
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <div class="card text-center p-5">
+                        <h3>📭 Nenhuma aposta registrada ainda</h3>
+                        <p class="text-muted">Registre suas apostas para ver a análise de resultados e recomendações.</p>
+                        <a href="/apostas" class="btn btn-primary btn-lg">
+                            <i class="bi bi-plus-circle"></i> Registrar Apostas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 Aplicação Loto. Todos os direitos reservados.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sidebar Toggle Functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const currentPage = window.location.pathname;
+
+        // Set active link based on current page
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // Toggle sidebar on menu button click
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+            sidebarOverlay.classList.toggle('show');
+        });
+
+        // Close sidebar on close button click
+        sidebarClose.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar on overlay click
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar when a link is clicked
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>

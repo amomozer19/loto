@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Apostas - Loto Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            margin-left: 15px;
+            padding: 8px 12px !important;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white !important;
+        }
+
+        .container-main {
+            padding: 40px 0;
+        }
+
+        .page-header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header h1 {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--primary);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats-card h3 {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .stats-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin: 10px 0;
+        }
+
+        .stats-label {
+            color: #666;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .feedback-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feedback-section h2 {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 15px;
+        }
+
+        .numero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .frequencia-label {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary);
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            margin-left: 5px;
+        }
+
+        .recomendacao-item {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            padding: 15px;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .recomendacao-item i {
+            color: var(--primary);
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .performance-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            color: #333;
+        }
+
+        .performance-card h4 {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .performance-card .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .performance-card .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .historico-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .table td {
+            vertical-align: middle;
+            padding: 15px;
+        }
+
+        .badge-acertos {
+            background: var(--success);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .badge-score {
+            background: var(--info);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 20px;
+            }
+
+            .stats-value {
+                font-size: 2rem;
+            }
+
+            .performance-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            padding-top: 80px;
+        }
+
+        .sidebar.show {
+            right: 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            margin: 0;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 15px 25px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-link:hover {
+            background-color: #f5f7ff;
+            color: var(--secondary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-link.active {
+            background-color: #e8f0ff;
+            border-left-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 10px 0;
+        }
+
+        .sidebar-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            z-index: 999;
+            transition: background 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sidebar-overlay.show {
+            background: rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Toggle Button -->
+    <button class="menu-toggle" id="menuToggle" title="Abrir menu">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+        <button class="sidebar-close" id="sidebarClose">
+            <i class="bi bi-x-circle"></i>
+        </button>
+        <ul class="sidebar-menu">
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/">
+                    <i class="bi bi-house-fill"></i> Início
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/novo">
+                    <i class="bi bi-plus-circle"></i> Novo Sorteio
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/aposta">
+                    <i class="bi bi-graph-up"></i> Apostas Recomendadas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/apostas">
+                    <i class="bi bi-clipboard-check"></i> Registrar Apostas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/estatisticas">
+                    <i class="bi bi-bar-chart"></i> Estatísticas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/sorte">
+                    <i class="bi bi-stars"></i> Sorte!
+                </a>
+            </li>
+            <div class="sidebar-divider"></div>
+            <li class="sidebar-item">
+                <a class="sidebar-link text-danger" href="/auth/encerrar" title="Encerrar sessão e servidor">
+                    <i class="bi bi-power"></i> Encerrar
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container-main">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1><i class="bi bi-graph-up"></i> Análise de Apostas</h1>
+                <p>Comparação entre previsões e resultados reais para otimizar futuras apostas</p>
+            </div>
+
+            <!-- Overall Stats Row -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-bookmark"></i> Apostas Registradas</h3>
+                        <div class="stats-value">{{ total_apostas }}</div>
+                        <div class="stats-label">Últimos 90 dias</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-check-circle"></i> Analisadas</h3>
+                        <div class="stats-value">{{ apostas_analisadas }}</div>
+                        <div class="stats-label">Com resultado do sorteio</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-percent"></i> Taxa de Processamento</h3>
+                        <div class="stats-value">
+                            {% if total_apostas > 0 %}
+                                {{ "%.0f"|format((apostas_analisadas / total_apostas * 100)) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </div>
+                        <div class="stats-label">Dados prontos para análise</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Section -->
+            {% if feedback %}
+            <div class="feedback-section">
+                <h2><i class="bi bi-lightbulb"></i> Dados de Retroalimentação</h2>
+
+                <!-- Números Mais Acertados -->
+                {% if feedback.numeros_mais_acertados %}
+                <div style="margin-bottom: 30px;">
+                    <h4 style="color: var(--primary); margin-bottom: 15px;">
+                        <i class="bi bi-star"></i> Top 10 Números Mais Sorteados
+                    </h4>
+                    <div>
+                        {% for item in feedback.numeros_mais_acertados %}
+                            <span class="numero-badge">
+                                {{ item.numero }}
+                                <span class="frequencia-label">{{ item.frequencia }} vezes</span>
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Performance por Tipo de Aposta -->
+                {% if feedback.tipos_aposta_performance %}
+                <div style="margin-bottom: 30px;">
+                    <h4 style="color: var(--primary); margin-bottom: 15px;">
+                        <i class="bi bi-award"></i> Performance por Tipo de Aposta
+                    </h4>
+                    <div class="performance-grid">
+                        {% for tipo, perf in feedback.tipos_aposta_performance.items() %}
+                        <div class="performance-card">
+                            <h4>{{ tipo }}</h4>
+                            <div class="metric">
+                                <span class="metric-label">Score Médio:</span>
+                                <span class="metric-value">{{ "%.1f"|format(perf.score_medio) }}</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Melhor Score:</span>
+                                <span class="metric-value">{{ perf.melhor_score }}</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Pior Score:</span>
+                                <span class="metric-value">{{ perf.pior_score }}</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Consistência:</span>
+                                <span class="metric-value">{{ perf.consistencia }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Recomendações -->
+                {% if feedback.recomendacoes %}
+                <div>
+                    <h4 style="color: var(--primary); margin-bottom: 15px;">
+                        <i class="bi bi-chat-left-text"></i> Recomendações para Melhorar
+                    </h4>
+                    {% for rec in feedback.recomendacoes %}
+                        <div class="recomendacao-item">
+                            <i class="bi bi-arrow-right-circle"></i>
+                            {{ rec }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <strong>Dados insuficientes:</strong> Ainda não há apostas com resultados registrados. Continue registrando apostas e sorteios para gerar análises.
+            </div>
+            {% endif %}
+
+            <!-- Histórico de Apostas -->
+            {% if historico_apostas %}
+            <div class="feedback-section">
+                <h2><i class="bi bi-calendar"></i> Histórico de Apostas (Últimos 30 dias)</h2>
+                <div class="historico-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Dia da Semana</th>
+                                <th>Apostas Geradas</th>
+                                <th>Resultado</th>
+                                <th>Melhor Aposta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for aposta_dia in historico_apostas[-30:] %}
+                            <tr>
+                                <td><strong>{{ aposta_dia.data }}</strong></td>
+                                <td>{{ aposta_dia.dia_semana }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        {{ aposta_dia.apostas|length }} apostas
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if aposta_dia.resultado_sorteio %}
+                                        <span class="badge-acertos">
+                                            <i class="bi bi-check"></i> Registrado
+                                        </span>
+                                    {% else %}
+                                        <span style="color: #999;">Pendente</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if aposta_dia.analise %}
+                                        <span class="badge-score">
+                                            {{ aposta_dia.analise.melhor_aposta }}
+                                        </span>
+                                    {% else %}
+                                        <span style="color: #999;">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Footer -->
+            <div class="footer">
+                <p>
+                    <i class="bi bi-shield-check"></i> Análise de Apostas - Retroalimentação Automática
+                </p>
+                <p style="font-size: 0.9rem; margin-top: 10px;">
+                    Última atualização: {{ feedback.periodo_analise if feedback else 'N/A' }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Sidebar Toggle Functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const currentPage = window.location.pathname;
+
+        // Set active link based on current page
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // Toggle sidebar on menu button click
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+            sidebarOverlay.classList.toggle('show');
+        });
+
+        // Close sidebar on close button click
+        sidebarClose.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar on overlay click
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar when a link is clicked
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>

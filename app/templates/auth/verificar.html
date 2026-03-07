@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Email - Loto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .verify-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .verify-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .verify-header h1 {
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .verify-header p {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .email-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .email-display strong {
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .form-control {
+            border: 2px solid #eee;
+            padding: 12px;
+            font-size: 18px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-align: center;
+            letter-spacing: 2px;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-verify {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            border-radius: 8px;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-verify:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .btn-back {
+            color: #667eea;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+            margin-top: 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 25px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .verify-container {
+                padding: 30px;
+            }
+
+            .verify-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <div class="verify-header">
+            <h1>✓ Verificar Email</h1>
+            <p>Insira o código de acesso recebido</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="email-display">
+            📧 <strong>{{ email }}</strong>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.verificar') }}">
+            <div class="form-group">
+                <label for="token">🔑 Código de Acesso</label>
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="token" 
+                    name="token" 
+                    placeholder="Insira o código"
+                    required
+                    autofocus
+                    autocomplete="off"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-verify">
+                Verificar e Acessar
+            </button>
+
+            <a href="{{ url_for('auth.login') }}" class="btn-back">
+                ← Voltar ao Login
+            </a>
+        </form>
+
+        <div class="info-box">
+            <p>
+                <strong>💡 Dica:</strong> O código foi enviado para seu email. 
+                Verifique sua caixa de entrada e spam se não encontrar.
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

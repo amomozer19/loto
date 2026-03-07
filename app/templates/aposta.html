@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loto - Gerador de Apostas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .header-section {
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .header-section h1 {
+            font-weight: 700;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .info-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-item .icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .info-item .label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-item .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .apostas-container {
+            display: grid;
+            gap: 30px;
+        }
+
+        .aposta-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease;
+        }
+
+        .aposta-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .aposta-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 25px;
+        }
+
+        .aposta-header h3 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .aposta-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .aposta-body {
+            padding: 30px;
+        }
+
+        .numeros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .numero-box {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .numero-box:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .tupla-item, .tripleta-item {
+            background: #f8f9ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .tupla-numbers, .tripleta-numbers {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tupla-numbers .num, .tripleta-numbers .num {
+            background: var(--primary-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .tupla-freq, .tripleta-freq {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .raciocinio {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 10px;
+            color: #0056b3;
+            font-style: italic;
+            border-left: 4px solid var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.1);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .index-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+
+        .index-list li {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 8px;
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .index-list i {
+            color: #4fc3f7;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            padding-top: 80px;
+        }
+
+        .sidebar.show {
+            right: 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            margin: 0;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 15px 25px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-link:hover {
+            background-color: #f5f7ff;
+            color: var(--secondary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-link.active {
+            background-color: #e8f0ff;
+            border-left-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 10px 0;
+        }
+
+        .sidebar-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            z-index: 999;
+            transition: background 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sidebar-overlay.show {
+            background: rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Toggle Button -->
+    <button class="menu-toggle" id="menuToggle" title="Abrir menu">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+        <button class="sidebar-close" id="sidebarClose">
+            <i class="bi bi-x-circle"></i>
+        </button>
+        <ul class="sidebar-menu">
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/">
+                    <i class="bi bi-house-fill"></i> Início
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/novo">
+                    <i class="bi bi-plus-circle"></i> Novo Sorteio
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/aposta">
+                    <i class="bi bi-graph-up"></i> Apostas Recomendadas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/apostas">
+                    <i class="bi bi-clipboard-check"></i> Registrar Apostas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/estatisticas">
+                    <i class="bi bi-bar-chart"></i> Estatísticas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/sorte">
+                    <i class="bi bi-stars"></i> Sorte!
+                </a>
+            </li>
+            <div class="sidebar-divider"></div>
+            <li class="sidebar-item">
+                <a class="sidebar-link text-danger" href="/auth/encerrar" title="Encerrar sessão e servidor">
+                    <i class="bi bi-power"></i> Encerrar
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="header-section">
+        <div class="container-lg">
+            <h1><i class="bi bi-lightbulb-fill"></i> Gerador de Apostas</h1>
+            <p>Recomendações inteligentes baseadas em análise histórica</p>
+        </div>
+    </div>
+
+    <div class="container-lg py-5">
+        <!-- Informações do Período -->
+        <div class="info-header">
+            <h4 style="margin: 0 0 15px 0;">Período Analisado</h4>
+            <div class="info-row">
+                <div class="info-item">
+                    <div class="icon"><i class="bi bi-calendar-event"></i></div>
+                    <div class="label">Data</div>
+                    <div class="value">{{ data_atual }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="icon"><i class="bi bi-calendar-week"></i></div>
+                    <div class="label">Dia da Semana</div>
+                    <div class="value">{{ dia_semana_nome }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="icon"><i class="bi bi-calendar-month"></i></div>
+                    <div class="label">Mês</div>
+                    <div class="value">{{ mes_nome }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="icon"><i class="bi bi-calendar2"></i></div>
+                    <div class="label">Ano</div>
+                    <div class="value">{{ ano }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Apostas Recomendadas -->
+        {% if apostas %}
+            <div class="apostas-container">
+                {% for aposta in apostas %}
+                    <div class="aposta-card">
+                        <div class="aposta-header">
+                            <h3><i class="bi bi-star-fill"></i> {{ aposta.nome }}</h3>
+                            <p><i class="bi bi-bookmark-fill"></i> {{ aposta.criterio }}</p>
+                        </div>
+
+                        <div class="aposta-body">
+                            <!-- Raciocínio -->
+                            <div class="raciocinio">
+                                <i class="bi bi-info-circle"></i> {{ aposta.raciocinio }}
+                            </div>
+
+                            <!-- Números Recomendados -->
+                            <div>
+                                <h5 class="section-title">
+                                    <i class="bi bi-dice-5"></i> Números Recomendados
+                                </h5>
+                                <div class="numeros-grid">
+                                    {% for numero in aposta.numeros %}
+                                        <div class="numero-box">{{ numero }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Tuplas -->
+                            {% if aposta.tuplas %}
+                                <h5 class="section-title">
+                                    <i class="bi bi-link-45deg"></i> Duplas Mais Frequentes
+                                </h5>
+                                {% for tupla, frequencia in aposta.tuplas %}
+                                    <div class="tupla-item">
+                                        <div class="tupla-numbers">
+                                            {% for num in tupla %}
+                                                <div class="num">{{ num }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="tupla-freq">{{ frequencia }}x</div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            <!-- Tripletas -->
+                            {% if aposta.tripletas %}
+                                <h5 class="section-title">
+                                    <i class="bi bi-diagram-3"></i> Tripletas Mais Frequentes
+                                </h5>
+                                {% for tripleta, frequencia in aposta.tripletas %}
+                                    <div class="tripleta-item">
+                                        <div class="tripleta-numbers">
+                                            {% for num in tripleta %}
+                                                <div class="num">{{ num }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="tripleta-freq">{{ frequencia }}x</div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="no-data">
+                        <i class="bi bi-inbox" style="font-size: 3rem; color: #ddd;"></i>
+                        <h4 style="color: #999; margin-top: 20px;">Nenhuma aposta disponível</h4>
+                        <p style="color: #bbb;">Adicione sorteios para gerar recomendações</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 Aplicação Loto. Todos os direitos reservados.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Sidebar Toggle Functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const currentPage = window.location.pathname;
+
+        // Set active link based on current page
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // Toggle sidebar on menu button click
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+            sidebarOverlay.classList.toggle('show');
+        });
+
+        // Close sidebar on close button click
+        sidebarClose.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar on overlay click
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar when a link is clicked
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>

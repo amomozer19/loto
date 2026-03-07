@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loto - Estatísticas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-section {
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .header-section h1 {
+            font-weight: 700;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-global {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .stat-box h4 {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-box .valor {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .dia-semana-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            border-left: 5px solid var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dia-semana-card:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card-header-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .card-header-toggle .toggle-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            transition: transform 0.3s ease;
+            margin-left: 15px;
+        }
+
+        .card-header-toggle.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .card-summary {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-item .icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .summary-item .text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-item .label {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-item .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .card-content {
+            display: none;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid #f0f0f0;
+            animation: slideDown 0.3s ease;
+        }
+
+        .card-content.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stats-line {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .stat-item .label {
+            color: #666;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .stat-item .valor {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .top-numeros {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .top-numeros h5 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .numero-frequencia {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .numero-frequencia .numero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 15px;
+            min-width: 40px;
+        }
+
+        .numero-frequencia .barra {
+            flex: 1;
+            height: 30px;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 15px;
+            margin-right: 10px;
+            position: relative;
+            min-width: 50px;
+        }
+
+        .numero-frequencia .freq {
+            color: #666;
+            font-weight: 600;
+            min-width: 50px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.1);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+
+        .tabs-container {
+            margin-top: 30px;
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--primary-color);
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            padding: 15px 25px;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: white;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-bottom-color: var(--secondary-color);
+            border-radius: 10px 10px 0 0;
+        }
+
+        .tab-content {
+            background: white;
+            border-radius: 0 0 15px 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .probability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .prob-number {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .prob-number:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .prob-number.high {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .prob-number.medium {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+        }
+
+        .prob-number.low {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .prob-number.zero {
+            background: #e0e0e0;
+            color: #999;
+        }
+
+        .numeros-jogados {
+            margin-top: 20px;
+        }
+
+        .numero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 5px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .numero-badge.nao-sorteado {
+            background: #ddd;
+            color: #666;
+            opacity: 0.6;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            padding-top: 80px;
+        }
+
+        .sidebar.show {
+            right: 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            margin: 0;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 15px 25px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-link:hover {
+            background-color: #f5f7ff;
+            color: var(--secondary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-link.active {
+            background-color: #e8f0ff;
+            border-left-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 10px 0;
+        }
+
+        .sidebar-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            z-index: 999;
+            transition: background 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sidebar-overlay.show {
+            background: rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Toggle Button -->
+    <button class="menu-toggle" id="menuToggle" title="Abrir menu">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+        <button class="sidebar-close" id="sidebarClose">
+            <i class="bi bi-x-circle"></i>
+        </button>
+        <ul class="sidebar-menu">
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/">
+                    <i class="bi bi-house-fill"></i> Início
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/novo">
+                    <i class="bi bi-plus-circle"></i> Novo Sorteio
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/aposta">
+                    <i class="bi bi-graph-up"></i> Apostas Recomendadas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/apostas">
+                    <i class="bi bi-clipboard-check"></i> Registrar Apostas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/estatisticas">
+                    <i class="bi bi-bar-chart"></i> Estatísticas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/sorte">
+                    <i class="bi bi-stars"></i> Sorte!
+                </a>
+            </li>
+            <div class="sidebar-divider"></div>
+            <li class="sidebar-item">
+                <a class="sidebar-link text-danger" href="/auth/encerrar" title="Encerrar sessão e servidor">
+                    <i class="bi bi-power"></i> Encerrar
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="header-section">
+        <div class="container-lg">
+            <h1><i class="bi bi-graph-up"></i> Estatísticas</h1>
+            <p>Análise detalhada de sorteios por dia da semana</p>
+        </div>
+    </div>
+
+    <div class="container-lg py-5">
+        {% if stats_globais.total_sorteios > 0 %}
+            <!-- Estatísticas Globais -->
+            <div class="stats-global">
+                <h3 class="mb-4" style="color: var(--primary-color); font-weight: 700;">
+                    <i class="bi bi-graph-up"></i> Resumo Global
+                </h3>
+                
+                <div class="row">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-box">
+                            <h4>Total de Sorteios</h4>
+                            <div class="valor">{{ stats_globais.total_sorteios }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-box">
+                            <h4>Números Únicos</h4>
+                            <div class="valor">{{ stats_globais.total_numeros_unicos }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-box">
+                            <h4>Número Mais Frequente</h4>
+                            <div class="valor">{{ stats_globais.numero_mais_frequente }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-box">
+                            <h4>Número Menos Frequente</h4>
+                            <div class="valor">{{ stats_globais.numero_menos_frequente }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 style="color: var(--primary-color); font-weight: 700;">Top 5 Mais Sorteados</h5>
+                        {% for numero, frequencia in stats_globais.numeros_mais_jogados %}
+                            <div class="numero-frequencia">
+                                <div class="numero">{{ numero }}</div>
+                                <div class="barra" style="width: {% if stats_globais.numeros_mais_jogados|length > 0 %}{{ (frequencia / stats_globais.numeros_mais_jogados[0][1] * 100) }}%{% endif %}"></div>
+                                <div class="freq">{{ frequencia }}x</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <h5 style="color: var(--primary-color); font-weight: 700;">Top 5 Menos Sorteados</h5>
+                        {% for numero, frequencia in stats_globais.numeros_menos_jogados | reverse %}
+                            <div class="numero-frequencia">
+                                <div class="numero">{{ numero }}</div>
+                                <div class="barra" style="width: {% if stats_globais.numeros_mais_jogados|length > 0 %}{{ (frequencia / stats_globais.numeros_mais_jogados[0][1] * 100) }}%{% endif %}"></div>
+                                <div class="freq">{{ frequencia }}x</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <p style="color: #666; margin-bottom: 5px;">
+                            <strong>Primeiro Sorteio:</strong> {{ stats_globais.data_primeira }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p style="color: #666; margin-bottom: 5px;">
+                            <strong>Último Sorteio:</strong> {{ stats_globais.data_ultima }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas por Dia da Semana -->
+            <h3 style="color: white; font-weight: 700; margin-bottom: 30px;">
+                <i class="bi bi-calendar-week"></i> Análise por Dia da Semana
+            </h3>
+
+            {% for dia in stats_por_dia %}
+                {% if dia.sorteios > 0 %}
+                    <div class="dia-semana-card" onclick="toggleCard(this)">
+                        <div class="card-header-toggle collapsed">
+                            <div>
+                                <h3 style="color: var(--primary-color); font-weight: 700; margin: 0; font-size: 1.5rem;">{{ dia.nome }}</h3>
+                            </div>
+                            <i class="bi bi-chevron-right toggle-icon"></i>
+                        </div>
+
+                        <div class="card-summary" style="margin-top: 15px;">
+                            <div class="summary-item">
+                                <div class="icon"><i class="bi bi-dice-5"></i></div>
+                                <div class="text">
+                                    <span class="label">Sorteios</span>
+                                    <span class="value">{{ dia.sorteios }}</span>
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="icon"><i class="bi bi-graph-up"></i></div>
+                                <div class="text">
+                                    <span class="label">Número Mais Frequente</span>
+                                    <span class="value">{{ dia.numeros_mais_jogados[0].numero if dia.numeros_mais_jogados else '-' }}</span>
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="icon"><i class="bi bi-graph-down"></i></div>
+                                <div class="text">
+                                    <span class="label">Não Sorteados</span>
+                                    <span class="value">{{ dia.numeros_nao_sorteados|length }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-content">
+                            <!-- Estatísticas Básicas -->
+                            <div class="stats-line">
+                                <div class="stat-item">
+                                    <div class="label">Média</div>
+                                    <div class="valor">{{ dia.media }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="label">Mediana</div>
+                                    <div class="valor">{{ dia.mediana }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="label">Desvio Padrão</div>
+                                    <div class="valor">{{ dia.desvio_padrao }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="label">Mínimo</div>
+                                    <div class="valor">{{ dia.minimo }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="label">Máximo</div>
+                                    <div class="valor">{{ dia.maximo }}</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="label">Média Ponderada</div>
+                                    <div class="valor">{{ dia.media_ponderada }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Top 10 Números Mais Jogados -->
+                            {% if dia.numeros_mais_jogados %}
+                                <div class="top-numeros">
+                                    <h5><i class="bi bi-trophy"></i> Top 10 Números Mais Sorteados</h5>
+                                    {% for item in dia.numeros_mais_jogados %}
+                                        <div class="numero-frequencia">
+                                            <div class="numero">{{ item.numero }}</div>
+                                            <div class="barra" style="width: {% if dia.numeros_mais_jogados|length > 0 %}{{ (item.frequencia / dia.numeros_mais_jogados[0].frequencia * 100) }}%{% endif %}"></div>
+                                            <div class="freq">{{ item.frequencia }}x</div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <!-- Números Não Sorteados -->
+                            {% if dia.numeros_nao_sorteados %}
+                                <div style="margin-top: 20px;">
+                                    <h5 style="color: var(--primary-color); font-weight: 700;">Números Não Sorteados</h5>
+                                    <div class="numeros-jogados">
+                                        {% for numero in dia.numeros_nao_sorteados %}
+                                            <span class="numero-badge nao-sorteado">{{ numero }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Probabilidade Heatmap -->
+                            <div style="margin-top: 30px;">
+                                <h5 style="color: var(--primary-color); font-weight: 700;"><i class="bi bi-pie-chart"></i> Heatmap de Probabilidades</h5>
+                                <small style="color: #999;">Visualização das probabilidades de cada número (1-25) baseada na frequência</small>
+                                <div class="probability-grid">
+                                    {% for num in range(1, 26) %}
+                                        {% set prob = dia.probabilidades[num] %}
+                                        {% if prob > 0 %}
+                                            {% if prob >= 10 %}
+                                                <div class="prob-number high" title="Probabilidade: {{ prob }}%">
+                                                    <div>{{ num }}</div>
+                                                    <small>{{ prob }}%</small>
+                                                </div>
+                                            {% elif prob >= 5 %}
+                                                <div class="prob-number medium" title="Probabilidade: {{ prob }}%">
+                                                    <div>{{ num }}</div>
+                                                    <small>{{ prob }}%</small>
+                                                </div>
+                                            {% else %}
+                                                <div class="prob-number low" title="Probabilidade: {{ prob }}%">
+                                                    <div>{{ num }}</div>
+                                                    <small>{{ prob }}%</small>
+                                                </div>
+                                            {% endif %}
+                                        {% else %}
+                                            <div class="prob-number zero" title="Ainda não sorteado">
+                                                <div>{{ num }}</div>
+                                                <small>0%</small>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <!-- Estatísticas por Mês -->
+            {% if stats_por_mes %}
+                <h3 style="color: white; font-weight: 700; margin-bottom: 30px; margin-top: 50px;">
+                    <i class="bi bi-calendar-month"></i> Análise por Mês
+                </h3>
+
+                {% for mes in stats_por_mes %}
+                    {% if mes.sorteios > 0 %}
+                        <div class="dia-semana-card" onclick="toggleCard(this)">
+                            <div class="card-header-toggle collapsed">
+                                <div>
+                                    <h3 style="color: var(--primary-color); font-weight: 700; margin: 0; font-size: 1.5rem;">{{ mes.nome }}</h3>
+                                </div>
+                                <i class="bi bi-chevron-right toggle-icon"></i>
+                            </div>
+
+                            <div class="card-summary" style="margin-top: 15px;">
+                                <div class="summary-item">
+                                    <div class="icon"><i class="bi bi-dice-5"></i></div>
+                                    <div class="text">
+                                        <span class="label">Sorteios</span>
+                                        <span class="value">{{ mes.sorteios }}</span>
+                                    </div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="icon"><i class="bi bi-graph-up"></i></div>
+                                    <div class="text">
+                                        <span class="label">Mais Frequente</span>
+                                        <span class="value">{{ mes.numero_mais_frequente }}</span>
+                                    </div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="icon"><i class="bi bi-graph-down"></i></div>
+                                    <div class="text">
+                                        <span class="label">Menos Frequente</span>
+                                        <span class="value">{{ mes.numero_menos_frequente }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-content">
+                                <!-- Top 10 Números Mais Jogados -->
+                                {% if mes.numeros_mais_jogados %}
+                                    <div class="top-numeros">
+                                        <h5><i class="bi bi-trophy"></i> Top 10 Números Mais Sorteados</h5>
+                                        {% set max_freq = mes.numeros_mais_jogados[0].frequencia %}
+                                        {% for item in mes.numeros_mais_jogados %}
+                                            <div class="numero-frequencia">
+                                                <div class="numero">{{ item.numero }}</div>
+                                                <div class="barra" style="width: {{ (item.frequencia / max_freq * 100) }}%"></div>
+                                                <div class="freq">{{ item.frequencia }}x</div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Top 10 Números Menos Sorteados -->
+                                {% if mes.numeros_menos_jogados %}
+                                    <div class="top-numeros" style="margin-top: 20px;">
+                                        <h5><i class="bi bi-graph-down"></i> Top 10 Números Menos Sorteados</h5>
+                                        {% set max_freq_menos = mes.numeros_menos_jogados[0].frequencia if mes.numeros_menos_jogados else 1 %}
+                                        {% for item in mes.numeros_menos_jogados %}
+                                            <div class="numero-frequencia">
+                                                <div class="numero">{{ item.numero }}</div>
+                                                <div class="barra" style="width: {{ (item.frequencia / max_freq_menos * 100) if max_freq_menos > 0 else 0 }}%"></div>
+                                                <div class="freq">{{ item.frequencia }}x</div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Números Não Sorteados -->
+                                {% if mes.numeros_nao_sorteados %}
+                                    <div style="margin-top: 20px;">
+                                        <h5 style="color: var(--primary-color); font-weight: 700;">Números Não Sorteados</h5>
+                                        <div class="numeros-jogados">
+                                            {% for numero in mes.numeros_nao_sorteados %}
+                                                <span class="numero-badge nao-sorteado">{{ numero }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            <!-- Estatísticas por Ano -->
+            {% if stats_por_ano %}
+                <h3 style="color: white; font-weight: 700; margin-bottom: 30px; margin-top: 50px;">
+                    <i class="bi bi-calendar2"></i> Análise por Ano
+                </h3>
+
+                {% for ano in stats_por_ano %}
+                    {% if ano.sorteios > 0 %}
+                        <div class="dia-semana-card" onclick="toggleCard(this)">
+                            <div class="card-header-toggle collapsed">
+                                <div>
+                                    <h3 style="color: var(--primary-color); font-weight: 700; margin: 0; font-size: 1.5rem;">{{ ano.nome }}</h3>
+                                </div>
+                                <i class="bi bi-chevron-right toggle-icon"></i>
+                            </div>
+
+                            <div class="card-summary" style="margin-top: 15px;">
+                                <div class="summary-item">
+                                    <div class="icon"><i class="bi bi-dice-5"></i></div>
+                                    <div class="text">
+                                        <span class="label">Sorteios</span>
+                                        <span class="value">{{ ano.sorteios }}</span>
+                                    </div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="icon"><i class="bi bi-graph-up"></i></div>
+                                    <div class="text">
+                                        <span class="label">Mais Frequente</span>
+                                        <span class="value">{{ ano.numero_mais_frequente }}</span>
+                                    </div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="icon"><i class="bi bi-graph-down"></i></div>
+                                    <div class="text">
+                                        <span class="label">Menos Frequente</span>
+                                        <span class="value">{{ ano.numero_menos_frequente }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-content">
+                                <!-- Top 10 Números Mais Jogados -->
+                                {% if ano.numeros_mais_jogados %}
+                                    <div class="top-numeros">
+                                        <h5><i class="bi bi-trophy"></i> Top 10 Números Mais Sorteados</h5>
+                                        {% set max_freq = ano.numeros_mais_jogados[0].frequencia %}
+                                        {% for item in ano.numeros_mais_jogados %}
+                                            <div class="numero-frequencia">
+                                                <div class="numero">{{ item.numero }}</div>
+                                                <div class="barra" style="width: {{ (item.frequencia / max_freq * 100) }}%"></div>
+                                                <div class="freq">{{ item.frequencia }}x</div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Top 10 Números Menos Sorteados -->
+                                {% if ano.numeros_menos_jogados %}
+                                    <div class="top-numeros" style="margin-top: 20px;">
+                                        <h5><i class="bi bi-graph-down"></i> Top 10 Números Menos Sorteados</h5>
+                                        {% set max_freq_menos = ano.numeros_menos_jogados[0].frequencia if ano.numeros_menos_jogados else 1 %}
+                                        {% for item in ano.numeros_menos_jogados %}
+                                            <div class="numero-frequencia">
+                                                <div class="numero">{{ item.numero }}</div>
+                                                <div class="barra" style="width: {{ (item.frequencia / max_freq_menos * 100) if max_freq_menos > 0 else 0 }}%"></div>
+                                                <div class="freq">{{ item.frequencia }}x</div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Números Não Sorteados -->
+                                {% if ano.numeros_nao_sorteados %}
+                                    <div style="margin-top: 20px;">
+                                        <h5 style="color: var(--primary-color); font-weight: 700;">Números Não Sorteados</h5>
+                                        <div class="numeros-jogados">
+                                            {% for numero in ano.numeros_nao_sorteados %}
+                                                <span class="numero-badge nao-sorteado">{{ numero }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+        {% else %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="no-data">
+                        <i class="bi bi-inbox" style="font-size: 3rem; color: #ddd;"></i>
+                        <h4 style="color: #999; margin-top: 20px;">Nenhum sorteio registrado</h4>
+                        <p style="color: #bbb;">Adicione sorteios para visualizar as estatísticas</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 Aplicação Loto. Todos os direitos reservados.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Função para alternar cards
+        function toggleCard(cardElement) {
+            const header = cardElement.querySelector('.card-header-toggle');
+            const content = cardElement.querySelector('.card-content');
+            
+            // Toggle collapsed class
+            header.classList.toggle('collapsed');
+            content.classList.toggle('show');
+        }
+
+        // Animação ao carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animar cards ao carregar
+            const cards = document.querySelectorAll('.dia-semana-card');
+            cards.forEach((card, index) => {
+                card.style.animation = `slideIn ${0.3 + index * 0.1}s ease`;
+            });
+        });
+    </script>
+
+    <script>
+        // Sidebar Toggle Functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const currentPage = window.location.pathname;
+
+        // Set active link based on current page
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // Toggle sidebar on menu button click
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+            sidebarOverlay.classList.toggle('show');
+        });
+
+        // Close sidebar on close button click
+        sidebarClose.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar on overlay click
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar when a link is clicked
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>

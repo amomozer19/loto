@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encerrando Aplicação</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .encerramento-card {
+            background: white;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .encerramento-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(1.05);
+            }
+        }
+
+        .encerramento-card h1 {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 2rem;
+        }
+
+        .encerramento-card p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .info-box strong {
+            color: var(--primary-color);
+        }
+
+        .info-box p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 2px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            animation: fillProgress 2s ease-out forwards;
+        }
+
+        @keyframes fillProgress {
+            from {
+                width: 0%;
+            }
+            to {
+                width: 100%;
+            }
+        }
+
+        .checkmark {
+            font-size: 3rem;
+            color: #4caf50;
+            margin-bottom: 10px;
+        }
+
+        .message-secondary {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="encerramento-card">
+        <div class="encerramento-icon">
+            <i class="bi bi-power"></i>
+        </div>
+
+        <h1>Encerrando Aplicação</h1>
+
+        <p>Sua sessão foi encerrada com sucesso!</p>
+
+        <div class="info-box">
+            <strong><i class="bi bi-check-circle"></i> Logout Realizado</strong>
+            <p>Você foi desconectado de forma segura. Seus dados foram salvos.</p>
+        </div>
+
+        <div class="info-box">
+            <strong><i class="bi bi-hourglass-split"></i> Servidor Encerrando</strong>
+            <p>O servidor está sendo encerrado agora. Esta página fechará automaticamente.</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+
+        <p class="message-secondary">
+            <i class="bi bi-info-circle"></i>
+            O servidor será totalmente encerrado em aproximadamente 1 segundo.
+        </p>
+
+        <div style="margin-top: 30px; padding-top: 30px; border-top: 1px solid #eee;">
+            <p style="margin: 0; color: #999; font-size: 0.9rem;">
+                <i class="bi bi-terminal"></i> Para reiniciar a aplicação, execute:
+            </p>
+            <code style="color: var(--primary-color); font-size: 0.85rem;">python run.py</code>
+        </div>
+    </div>
+
+    <script>
+        // Fechar página após 3 segundos
+        setTimeout(() => {
+            window.close();
+        }, 3000);
+
+        // Atualizar a cada 500ms para saber se servidor está offline
+        let tentativas = 0;
+        const verificarServidor = setInterval(() => {
+            fetch('/')
+                .catch(() => {
+                    // Servidor offline - mostrar mensagem
+                    clearInterval(verificarServidor);
+                });
+            tentativas++;
+            if (tentativas > 6) {
+                clearInterval(verificarServidor);
+            }
+        }, 500);
+    </script>
+</body>
+</html>

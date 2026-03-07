@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorte! - Análise de Números</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #4CAF50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            padding-top: 80px;
+        }
+
+        .sidebar.show {
+            right: 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            margin: 0;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 15px 25px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-link:hover {
+            background-color: #f5f7ff;
+            color: var(--secondary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar-link.active {
+            background-color: #e8f0ff;
+            border-left-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 10px 0;
+        }
+
+        .sidebar-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            z-index: 999;
+            transition: background 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sidebar-overlay.show {
+            background: rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+        }
+
+        .header-section {
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .header-section h1 {
+            font-weight: 700;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-section p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+            padding: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 35px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .numero-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .numero-input input {
+            width: 70px;
+            height: 70px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .numero-input input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+            outline: none;
+        }
+
+        .numero-input input.filled {
+            background-color: #e8f4f8;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .badge-numero {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 5px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .analise-resultado {
+            display: none;
+        }
+
+        .analise-resultado.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .score-badge {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .score-excelente {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
+        .score-bom {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        }
+
+        .score-medio {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        }
+
+        .score-baixo {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        }
+
+        .recomendacao {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .numeros-mais-jogados {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .numero-badge {
+            background: linear-gradient(135deg, var(--success-color) 0%, #388E3C 100%);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .numero-badge.azarao {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+
+        .tabela-tuplas, .tabela-tripletas {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .tabela-tuplas table, .tabela-tripletas table {
+            margin-bottom: 0;
+        }
+
+        .tabela-tuplas thead, .tabela-tripletas thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .potencial-alto {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .potencial-medio {
+            color: #ff9800;
+            font-weight: 600;
+        }
+
+        .potencial-baixo {
+            color: #f44336;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner-border {
+            color: white;
+        }
+
+        .info-box {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        h4 {
+            color: #444;
+            font-weight: 600;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        .progress-item {
+            margin: 15px 0;
+        }
+
+        .progress-item-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .progress {
+            height: 8px;
+            border-radius: 5px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Toggle Button -->
+    <button class="menu-toggle" id="menuToggle" title="Abrir menu">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+        <button class="sidebar-close" id="sidebarClose">
+            <i class="bi bi-x-circle"></i>
+        </button>
+        <ul class="sidebar-menu">
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/">
+                    <i class="bi bi-house-fill"></i> Início
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/novo">
+                    <i class="bi bi-plus-circle"></i> Novo Sorteio
+                </a>
+            </li>
+            <li class="sidebar-item">                <a class="sidebar-link" href="/aposta">
+                    <i class="bi bi-graph-up"></i> Apostas Recomendadas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link" href="/apostas">
+                    <i class="bi bi-clipboard-check"></i> Registrar Apostas
+                </a>
+            </li>
+            <li class="sidebar-item">                <a class="sidebar-link" href="/estatisticas">
+                    <i class="bi bi-bar-chart"></i> Estatísticas
+                </a>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-link active" href="/sorte">
+                    <i class="bi bi-stars"></i> Sorte!
+                </a>
+            </li>
+            <div class="sidebar-divider"></div>
+            <li class="sidebar-item">
+                <a class="sidebar-link text-danger" href="/auth/encerrar" title="Encerrar sessão e servidor">
+                    <i class="bi bi-power"></i> Encerrar
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Header -->
+    <div class="header-section">
+        <div class="container">
+            <h1><i class="bi bi-stars"></i> Sorte!</h1>
+            <p>Descubra as melhores combinações com seus 7 números escolhidos</p>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container" style="padding: 40px 0;">
+        <!-- Formulário de entrada -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-pencil-square"></i> Escolha seus 7 números
+                    </div>
+                    <div class="card-body">
+                        <div class="numero-input" id="numeroInputs">
+                            <!-- Gerados dinamicamente -->
+                        </div>
+                        <div style="margin-top: 30px; text-align: center;">
+                            <button type="button" class="btn btn-primary" onclick="analisarNumeros()">
+                                <i class="bi bi-play-fill"></i> Analisar Números
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" onclick="limparNumeros()" style="margin-left: 10px;">
+                                <i class="bi bi-arrow-clockwise"></i> Limpar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p style="color: white; margin-top: 20px; font-weight: 600;">Analisando seus números...</p>
+        </div>
+
+        <!-- Resultado da Análise -->
+        <div class="analise-resultado" id="analiseResultado">
+            <!-- Score Geral -->
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div id="scoreBadge" class="score-badge"></div>
+                </div>
+            </div>
+
+            <!-- Recomendações -->
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-lightbulb"></i> Recomendações e Análises
+                        </div>
+                        <div class="card-body" id="recomendacoes">
+                            <!-- Preenchido dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Números Escolhidos -->
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-list-check"></i> Seus Números
+                        </div>
+                        <div class="card-body">
+                            <div class="numeros-mais-jogados" id="numerosEscolhidos">
+                                <!-- Preenchido dinamicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Números Mais Jogados -->
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-graph-up"></i> Números Mais Jogados
+                        </div>
+                        <div class="card-body">
+                            <p style="color: #666; margin-bottom: 15px;">Estes são os números mais frequentes no histórico. Você incluiu:</p>
+                            <div class="numeros-mais-jogados" id="numerosMaisJogados">
+                                <!-- Preenchido dinamicamente -->
+                            </div>
+                            <div id="avisoMaisJogados" style="margin-top: 15px; color: #666;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Números Azarões -->
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-exclamation-circle"></i> Números Azarões
+                        </div>
+                        <div class="card-body">
+                            <p style="color: #666; margin-bottom: 15px;">Estes números aparecem muito raro no histórico:</p>
+                            <div class="numeros-mais-jogados" id="numerosAzaroes">
+                                <!-- Preenchido dinamicamente -->
+                            </div>
+                            <div id="avisoAzaroes" style="margin-top: 15px; color: #666;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Análise de Cada Número -->
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-bar-chart"></i> Análise Detalhada de Cada Número
+                        </div>
+                        <div class="card-body" id="analiseCadaNumero">
+                            <!-- Preenchido dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tuplas (Duplas) -->
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-link-45deg"></i> Top 5 Melhores Duplas (Tuplas)
+                        </div>
+                        <div class="card-body tabela-tuplas">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Dupla</th>
+                                            <th>Freq. Histórica</th>
+                                            <th>Score</th>
+                                            <th>Potencial</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabelaTuplas">
+                                        <!-- Preenchido dinamicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tripletas -->
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-diagram-3"></i> Top 5 Melhores Tripletas
+                        </div>
+                        <div class="card-body tabela-tripletas">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Tripleta</th>
+                                            <th>Freq. Histórica</th>
+                                            <th>Score</th>
+                                            <th>Potencial</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabelaTripletas">
+                                        <!-- Preenchido dinamicamente -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="background: rgba(0, 0, 0, 0.1); color: white; padding: 20px; text-align: center; margin-top: 40px;">
+        <p style="margin: 0;">💡 Esta análise é baseada em dados históricos e serve apenas como informação.<br>Nenhum número é garantido!</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Criar inputs para 7 números
+        function criarInputsNumeros() {
+            const container = document.getElementById('numeroInputs');
+            container.innerHTML = '';
+            for (let i = 0; i < 7; i++) {
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = '1';
+                input.max = '25';
+                input.placeholder = `Nº ${i + 1}`;
+                input.className = 'numero-input-field';
+                input.addEventListener('input', function() {
+                    if (this.value) {
+                        this.classList.add('filled');
+                    } else {
+                        this.classList.remove('filled');
+                    }
+                });
+                container.appendChild(input);
+            }
+        }
+
+        // Validar e obter números
+        function obterNumeros() {
+            const inputs = document.querySelectorAll('.numero-input-field');
+            const numeros = [];
+            
+            for (let input of inputs) {
+                if (input.value) {
+                    numeros.push(parseInt(input.value));
+                }
+            }
+            
+            return numeros;
+        }
+
+        // Validar números
+        function validarNumeros(numeros) {
+            if (numeros.length !== 7) {
+                alert('Por favor, insira exatamente 7 números!');
+                return false;
+            }
+            
+            if (new Set(numeros).size !== 7) {
+                alert('Não pode haver números repetidos!');
+                return false;
+            }
+            
+            if (!numeros.every(n => n >= 1 && n <= 25)) {
+                alert('Todos os números devem estar entre 1 e 25!');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Analisar números
+        async function analisarNumeros() {
+            const numeros = obterNumeros();
+            
+            if (!validarNumeros(numeros)) {
+                return;
+            }
+            
+            // Mostrar loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('analiseResultado').classList.remove('show');
+            
+            try {
+                const response = await fetch('/api/analisar-sorte', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ numeros })
+                });
+                
+                if (!response.ok) {
+                    const erro = await response.json();
+                    alert('Erro: ' + (erro.erro || 'Erro desconhecido'));
+                    document.getElementById('loading').classList.remove('show');
+                    return;
+                }
+                
+                const analise = await response.json();
+                
+                if (analise.erro) {
+                    alert('Erro: ' + analise.erro);
+                    document.getElementById('loading').classList.remove('show');
+                    return;
+                }
+                
+                // Exibir resultados
+                exibirResultados(analise);
+                
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('analiseResultado').classList.add('show');
+                
+                // Scroll para os resultados
+                setTimeout(() => {
+                    document.getElementById('analiseResultado').scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+                
+            } catch (error) {
+                alert('Erro ao conectar com o servidor: ' + error.message);
+                document.getElementById('loading').classList.remove('show');
+            }
+        }
+
+        // Exibir resultados da análise
+        function exibirResultados(analise) {
+            // Score Badge
+            const scoreValue = analise.score_geral;
+            let scoreBadgeClass = 'score-excelente';
+            let scoreText = '';
+            
+            if (scoreValue >= 75) {
+                scoreBadgeClass = 'score-excelente';
+                scoreText = '✨ EXCELENTE ✨';
+            } else if (scoreValue >= 60) {
+                scoreBadgeClass = 'score-bom';
+                scoreText = '👍 BOM 👍';
+            } else if (scoreValue >= 40) {
+                scoreBadgeClass = 'score-medio';
+                scoreText = '🎪 MÉDIO 🎪';
+            } else {
+                scoreBadgeClass = 'score-baixo';
+                scoreText = '⚡ COM RISCO ⚡';
+            }
+            
+            const scoreBadge = document.getElementById('scoreBadge');
+            scoreBadge.className = `score-badge ${scoreBadgeClass}`;
+            scoreBadge.innerHTML = `${scoreBadge.innerHTML = `<div style="font-size: 3rem; margin-bottom: 10px;">${scoreValue}</div><div>SCORE GERAL</div><div style="font-size: 1.2rem; margin-top: 10px;">${scoreText}</div>`}`;
+            
+            // Recomendações
+            const recomendacoesDiv = document.getElementById('recomendacoes');
+            recomendacoesDiv.innerHTML = '';
+            
+            analise.recomendacoes.forEach(rec => {
+                const div = document.createElement('div');
+                div.className = 'recomendacao';
+                div.textContent = rec;
+                recomendacoesDiv.appendChild(div);
+            });
+            
+            // Números escolhidos
+            const numerosEscolhidosDiv = document.getElementById('numerosEscolhidos');
+            numerosEscolhidosDiv.innerHTML = '';
+            analise.numeros_entrada.forEach(num => {
+                const span = document.createElement('span');
+                span.className = 'numero-badge';
+                span.textContent = num;
+                numerosEscolhidosDiv.appendChild(span);
+            });
+            
+            // Números mais jogados
+            const numerosMaisDiv = document.getElementById('numerosMaisJogados');
+            numerosMaisDiv.innerHTML = '';
+            if (analise.numeros_mais_jogados.length > 0) {
+                analise.numeros_mais_jogados.forEach(item => {
+                    const span = document.createElement('span');
+                    span.className = 'numero-badge';
+                    span.textContent = `${item.numero} (freq: ${item.frequencia})`;
+                    numerosMaisDiv.appendChild(span);
+                });
+                document.getElementById('avisoMaisJogados').innerHTML = `<i class="bi bi-check-circle-fill" style="color: #4CAF50;"></i> Você tem ${analise.numeros_mais_jogados.length} números entre os mais sorteados!`;
+            } else {
+                numerosMaisDiv.innerHTML = '<span style="color: #999;">Nenhum número entre os mais sorteados</span>';
+                document.getElementById('avisoMaisJogados').innerHTML = '';
+            }
+            
+            // Números azarões
+            const numerosAzaroesDiv = document.getElementById('numerosAzaroes');
+            numerosAzaroesDiv.innerHTML = '';
+            if (analise.numeros_azaroes.length > 0) {
+                analise.numeros_azaroes.forEach(item => {
+                    const span = document.createElement('span');
+                    span.className = 'numero-badge azarao';
+                    span.textContent = `${item.numero} (freq: ${item.frequencia})`;
+                    numerosAzaroesDiv.appendChild(span);
+                });
+                document.getElementById('avisoAzaroes').innerHTML = `<i class="bi bi-exclamation-circle-fill" style="color: #f44336;"></i> Você tem ${analise.numeros_azaroes.length} números azarões!`;
+            } else {
+                numerosAzaroesDiv.innerHTML = '<span style="color: #999;">Nenhum número azarado!</span>';
+                document.getElementById('avisoAzaroes').innerHTML = '';
+            }
+            
+            // Análise detalhada de cada número
+            const analiseCadaDiv = document.getElementById('analiseCadaNumero');
+            analiseCadaDiv.innerHTML = '';
+            analise.analise_numeros.forEach(num => {
+                const div = document.createElement('div');
+                div.className = 'progress-item';
+                div.innerHTML = `
+                    <div class="progress-item-label">
+                        <span>Número ${num.numero}</span>
+                        <span>${num.percentual}% / ${num.tendencia}</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: ${num.chance_relativa}%"></div>
+                    </div>
+                    <small style="color: #999;">Frequência: ${num.frequencia}</small>
+                `;
+                analiseCadaDiv.appendChild(div);
+            });
+            
+            // Tuplas
+            const tabelaTuplasBody = document.getElementById('tabelaTuplas');
+            tabelaTuplasBody.innerHTML = '';
+            analise.tuplas_recomendadas.forEach(tupla => {
+                const tr = document.createElement('tr');
+                const potencialClass = `potencial-${tupla.potencial.toLowerCase()}`;
+                tr.innerHTML = `
+                    <td><strong>${tupla.numeros.join(', ')}</strong></td>
+                    <td>${tupla.frequencia_historica}</td>
+                    <td><strong>${tupla.score}</strong></td>
+                    <td><span class="${potencialClass}">${tupla.potencial}</span></td>
+                `;
+                tabelaTuplasBody.appendChild(tr);
+            });
+            
+            // Tripletas
+            const tabelaTriplatasBody = document.getElementById('tabelaTripletas');
+            tabelaTriplatasBody.innerHTML = '';
+            analise.tripletas_recomendadas.forEach(tripleta => {
+                const tr = document.createElement('tr');
+                const potencialClass = `potencial-${tripleta.potencial.toLowerCase()}`;
+                tr.innerHTML = `
+                    <td><strong>${tripleta.numeros.join(', ')}</strong></td>
+                    <td>${tripleta.frequencia_historica}</td>
+                    <td><strong>${tripleta.score}</strong></td>
+                    <td><span class="${potencialClass}">${tripleta.potencial}</span></td>
+                `;
+                tabelaTriplatasBody.appendChild(tr);
+            });
+        }
+
+        // Limpar números
+        function limparNumeros() {
+            document.querySelectorAll('.numero-input-field').forEach(input => {
+                input.value = '';
+                input.classList.remove('filled');
+            });
+            document.getElementById('analiseResultado').classList.remove('show');
+        }
+
+        // Inicializar
+        window.addEventListener('DOMContentLoaded', function() {
+            criarInputsNumeros();
+        });
+
+        // Sidebar Toggle Functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const currentPage = window.location.pathname;
+
+        // Set active link based on current page
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // Toggle sidebar on menu button click
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+            sidebarOverlay.classList.toggle('show');
+        });
+
+        // Close sidebar on close button click
+        sidebarClose.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar on overlay click
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+
+        // Close sidebar when a link is clicked
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>
